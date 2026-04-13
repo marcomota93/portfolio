@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Marco Mota — Videografia</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black: #080808;
+      --white: #f2f0eb;
+      --accent: #e8ff00;
+      --mid: #1a1a1a;
+      --muted: #555;
+      --border: rgba(242,240,235,0.1);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--black);
+      color: var(--white);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      cursor: none;
+      overflow-x: hidden;
+    }
+
+    /* CUSTOM CURSOR */
+    #cursor {
+      position: fixed;
+      width: 10px; height: 10px;
+      background: var(--accent);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      transition: transform 0.1s ease, width 0.3s ease, height 0.3s ease, background 0.3s ease;
+      mix-blend-mode: difference;
+    }
+    #cursor.expand {
+      width: 48px; height: 48px;
+      background: var(--white);
+    }
+
+    /* NAV */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.5rem 3rem;
+      border-bottom: 1px solid var(--border);
+      background: rgba(8,8,8,0.85);
+      backdrop-filter: blur(12px);
+    }
+
+    .nav-logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.5rem;
+      letter-spacing: 0.1em;
+      color: var(--white);
+      text-decoration: none;
+    }
+    .nav-logo span { color: var(--accent); }
+
+    .nav-links {
+      display: flex;
+      gap: 2.5rem;
+      list-style: none;
+    }
+    .nav-links a {
+      text-decoration: none;
+      color: var(--muted);
+      font-size: 0.8rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--accent); }
+
+    /* HERO */
+    #hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 0 3rem 4rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 60% at 70% 30%, rgba(232,255,0,0.06) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 50% at 20% 80%, rgba(232,255,0,0.04) 0%, transparent 60%);
+    }
+
+    .hero-noise {
+      position: absolute;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      opacity: 0.4;
+      pointer-events: none;
+    }
+
+    .hero-eyebrow {
+      font-size: 0.75rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1.5rem;
+      opacity: 0;
+      animation: fadeUp 0.8s ease 0.2s forwards;
+    }
+
+    .hero-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(5rem, 14vw, 13rem);
+      line-height: 0.9;
+      letter-spacing: -0.01em;
+      opacity: 0;
+      animation: fadeUp 0.8s ease 0.4s forwards;
+    }
+
+    .hero-title .line2 {
+      display: block;
+      color: var(--accent);
+      -webkit-text-stroke: 0px;
+    }
+
+    .hero-title .outline {
+      -webkit-text-stroke: 1px var(--white);
+      color: transparent;
+    }
+
+    .hero-sub {
+      margin-top: 2rem;
+      max-width: 400px;
+      font-size: 1rem;
+      line-height: 1.6;
+      color: rgba(242,240,235,0.5);
+      opacity: 0;
+      animation: fadeUp 0.8s ease 0.6s forwards;
+    }
+
+    .hero-scroll {
+      position: absolute;
+      bottom: 3rem;
+      right: 3rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      opacity: 0;
+      animation: fadeIn 1s ease 1.2s forwards;
+    }
+    .hero-scroll span {
+      font-size: 0.65rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--muted);
+      writing-mode: vertical-rl;
+    }
+    .scroll-line {
+      width: 1px;
+      height: 60px;
+      background: linear-gradient(to bottom, var(--accent), transparent);
+      animation: scrollPulse 2s ease infinite;
+    }
+
+    /* SECTION BASE */
+    section {
+      padding: 6rem 3rem;
+    }
+
+    .section-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1rem;
+    }
+
+    .section-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(2.5rem, 5vw, 4.5rem);
+      letter-spacing: 0.02em;
+      line-height: 1;
+      margin-bottom: 3rem;
+    }
+
+    /* PORTFOLIO */
+    #portfolio {
+      border-top: 1px solid var(--border);
+    }
+
+    .portfolio-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 3rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .filter-tabs {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .filter-tab {
+      padding: 0.4rem 1rem;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: none;
+      transition: all 0.2s;
+    }
+    .filter-tab:hover, .filter-tab.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: var(--black);
+    }
+
+    .portfolio-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 1rem;
+    }
+
+    .video-card {
+      position: relative;
+      overflow: hidden;
+      background: var(--mid);
+      cursor: none;
+    }
+
+    /* Shorts — vertical, 2 por linha em grupos de 3 */
+    .video-card:not(.featured) {
+      grid-column: span 1;
+    }
+
+    /* Casamentos — widescreen, 1 por linha mas 3 colunas = metade da grelha */
+    .video-card.featured {
+      grid-column: span 2;
+    }
+
+    /* Eventos placeholder — ocupa o espaço restante */
+    .video-card:last-child {
+      grid-column: span 6;
+    }
+
+    /* Embed containers */
+    .video-embed {
+      width: 100%;
+      overflow: hidden;
+      background: #000;
+    }
+    .video-embed.short {
+      aspect-ratio: 9/16;
+    }
+    .video-embed.wide {
+      aspect-ratio: 16/9;
+    }
+    .video-embed iframe {
+      width: 100%;
+      height: 100%;
+      display: block;
+      border: none;
+    }
+
+    .video-placeholder {
+      width: 100%;
+      aspect-ratio: 16/9;
+      background: var(--mid);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      border: 1px dashed rgba(242,240,235,0.15);
+      transition: border-color 0.3s;
+    }
+
+    .video-placeholder svg {
+      opacity: 0.2;
+      transition: opacity 0.3s;
+    }
+
+    .video-card:hover .video-placeholder {
+      border-color: var(--accent);
+    }
+    .video-card:hover .video-placeholder svg {
+      opacity: 0.6;
+    }
+
+    .video-placeholder p {
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .video-card-info {
+      padding: 0.75rem 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .video-card-title {
+      font-size: 0.85rem;
+      font-weight: 400;
+    }
+
+    .video-card-tag {
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    /* ABOUT */
+    #about {
+      border-top: 1px solid var(--border);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: center;
+    }
+
+    .about-visual {
+      position: relative;
+    }
+
+    .about-img-placeholder {
+      width: 100%;
+      aspect-ratio: 3/4;
+      background: var(--mid);
+      border: 1px dashed rgba(242,240,235,0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .about-img-placeholder svg { opacity: 0.2; }
+    .about-img-placeholder p {
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .about-accent-block {
+      position: absolute;
+      bottom: -1.5rem;
+      right: -1.5rem;
+      width: 120px; height: 120px;
+      background: var(--accent);
+      z-index: -1;
+    }
+
+    .about-content {}
+
+    .about-body {
+      font-size: 1rem;
+      line-height: 1.8;
+      color: rgba(242,240,235,0.65);
+      margin-bottom: 2.5rem;
+    }
+
+    .about-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      border-top: 1px solid var(--border);
+      padding-top: 2rem;
+    }
+
+    .stat-number {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 3rem;
+      color: var(--accent);
+      line-height: 1;
+    }
+    .stat-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 0.25rem;
+    }
+
+    /* SERVICES */
+    #services {
+      border-top: 1px solid var(--border);
+    }
+
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+    }
+
+    .service-item {
+      background: var(--black);
+      padding: 2.5rem 2rem;
+      transition: background 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .service-item::before {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0;
+      width: 100%; height: 2px;
+      background: var(--accent);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.4s ease;
+    }
+
+    .service-item:hover { background: var(--mid); }
+    .service-item:hover::before { transform: scaleX(1); }
+
+    .service-number {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 4rem;
+      color: rgba(232,255,0,0.1);
+      line-height: 1;
+      margin-bottom: 1rem;
+      transition: color 0.3s;
+    }
+    .service-item:hover .service-number {
+      color: rgba(232,255,0,0.25);
+    }
+
+    .service-name {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.6rem;
+      letter-spacing: 0.05em;
+      margin-bottom: 1rem;
+    }
+
+    .service-desc {
+      font-size: 0.85rem;
+      line-height: 1.7;
+      color: rgba(242,240,235,0.5);
+    }
+
+    .service-tags {
+      margin-top: 1.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+
+    .service-tag {
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border: 1px solid var(--border);
+      padding: 0.25rem 0.6rem;
+      color: var(--muted);
+    }
+
+    /* CONTACT */
+    #contact {
+      border-top: 1px solid var(--border);
+      text-align: center;
+    }
+
+    .contact-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(3rem, 8vw, 7rem);
+      line-height: 1;
+      letter-spacing: 0.02em;
+      margin-bottom: 1.5rem;
+    }
+
+    .contact-title .accent { color: var(--accent); }
+    .contact-title .outline {
+      -webkit-text-stroke: 1px var(--white);
+      color: transparent;
+    }
+
+    .contact-sub {
+      color: rgba(242,240,235,0.4);
+      font-size: 1rem;
+      margin-bottom: 3rem;
+      max-width: 400px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .contact-email {
+      display: inline-block;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.3rem;
+      letter-spacing: 0.1em;
+      color: var(--white);
+      text-decoration: none;
+      border-bottom: 2px solid var(--accent);
+      padding-bottom: 0.25rem;
+      transition: color 0.2s;
+    }
+    .contact-email:hover { color: var(--accent); }
+
+    .contact-socials {
+      margin-top: 3rem;
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+    }
+
+    .social-link {
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .social-link:hover { color: var(--accent); }
+
+    /* FOOTER */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 1.5rem 3rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .footer-logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1rem;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+    }
+    .footer-logo span { color: var(--accent); }
+
+    .footer-copy {
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+    }
+
+    /* ANIMATIONS */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes scrollPulse {
+      0%, 100% { transform: scaleY(1); opacity: 1; }
+      50% { transform: scaleY(0.6); opacity: 0.4; }
+    }
+
+    /* SCROLL REVEAL */
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 900px) {
+      nav { padding: 1.2rem 1.5rem; }
+      .nav-links { display: none; }
+      section { padding: 4rem 1.5rem; }
+      #hero { padding: 0 1.5rem 3rem; }
+      .hero-scroll { right: 1.5rem; }
+      .portfolio-grid { grid-template-columns: repeat(2, 1fr); }
+      .video-card:not(.featured) { grid-column: span 1; }
+      .video-card.featured { grid-column: span 2; }
+      .video-card:last-child { grid-column: span 2; }
+      #about { grid-template-columns: 1fr; }
+      .about-accent-block { display: none; }
+      .services-grid { grid-template-columns: 1fr; }
+      .contact-title { font-size: clamp(2.5rem, 10vw, 5rem); }
+      footer { flex-direction: column; gap: 1rem; text-align: center; }
+    }
+
+    @media (max-width: 500px) {
+      .portfolio-grid { grid-template-columns: 1fr; }
+      .video-card:not(.featured), .video-card.featured, .video-card:last-child { grid-column: span 1; }
+      .about-stats { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="cursor"></div>
+
+  <!-- NAV -->
+  <nav>
+    <a href="#hero" class="nav-logo">MARCO<span>.</span>MOTA</a>
+    <ul class="nav-links">
+      <li><a href="#portfolio">Portfólio</a></li>
+      <li><a href="#about">Sobre</a></li>
+      <li><a href="#services">Serviços</a></li>
+      <li><a href="#contact">Contacto</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section id="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-noise"></div>
+    <p class="hero-eyebrow">Videografia — Aveiro, Portugal</p>
+    <h1 class="hero-title">
+      <span class="outline">MARCO</span>
+      <span class="line2">MOTA</span>
+    </h1>
+    <p class="hero-sub">Conteúdo que move — de casamentos íntimos a campanhas de marca, cada frame conta uma história.</p>
+    <div class="hero-scroll">
+      <div class="scroll-line"></div>
+      <span>Scroll</span>
+    </div>
+  </section>
+
+  <!-- PORTFOLIO -->
+  <section id="portfolio">
+    <div class="portfolio-header reveal">
+      <div>
+        <p class="section-label">Trabalho</p>
+        <h2 class="section-title">PORTFÓLIO</h2>
+      </div>
+      <div class="filter-tabs">
+        <button class="filter-tab active" data-filter="all">Todos</button>
+        <button class="filter-tab" data-filter="social">Social Media</button>
+        <button class="filter-tab" data-filter="casamentos">Casamentos</button>
+      </div>
+    </div>
+
+    <div class="portfolio-grid">
+
+      <!-- SOCIAL MEDIA — 6 Shorts -->
+      <div class="video-card reveal" data-category="social">
+        <div class="video-embed short">
+          <iframe src="https://www.youtube.com/embed/vX4e10CXwaE" frameborder="0" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+        </div>
+        <div class="video-card-info">
+          <span class="video-card-title">Conteúdo de Marca</span>
+          <span class="video-card-tag">Social Media</span>
+        </div>
+      </div>
+      <div class="video-card reveal" data-category="social">
+        <div class="video-embed short">
+          <iframe src="https://www.youtube.com/embed/6UEjy908qd8" frameborder="0" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+        </div>
+        <div class="video-card-info">
+          <span class="video-card-title">Conteúdo de Marca</span>
+          <span class="video-card-tag">Social Media</span>
+        </div>
+      </div>
+      <div class="video-card reveal" data-category="social">
+        <div class="video-embed short">
+          <iframe src="https://www.youtube.com/embed/kvMKZCRBJQ8" frameborder="0" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+        </div>
+        <div class="video-card-info">
+          <span class="video-card-title">Conteúdo de Marca</span>
+          <span class="video-card-tag">Social Media</span>
+        </div>
+      </div>
+      <div class="video-card reveal" data-category="social">
+        <div class="video-embed short">
+          <iframe src="https://www.youtube.com/embed/20sOuWpNzIU" frameborder="0" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+        </div>
+        <div class="video-card-info">
+          <span class="video-card-title">Conteúdo de Marca</span>
+          <span class="video-card-tag">Social Media</span>
+        </div>
+      </div>
+      <div class="video-card reveal" data-category="social">
+        <div class="video-embed short">
+          <iframe src="https://www.youtube.com/embed/DzG3rodxwT4" frameborder="0" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+        </div>
+        <div class="video-card-info">
+          <span class="video-card-title">Conteúdo de Marca</span>
+          <span class="video-card-tag">Social Media</span>
+        </div>
+      </div>
+      <div class="video-card reveal" data-category="social">
+        <div class="video-embed short">
+          <iframe src="https://www.youtube.com/embed/7aNEUuldN_Y" frameborder="0" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+        </div>
+        <div class="video-card-info">
+          <span class="video-card-title">Conteúdo de Marca</span>
+          <span class="video-card-tag">Social Media</span>
+        </div>
+      </div>
+
+      <!-- CASAMENTOS — 3 vídeos largos, destaque -->
+      <div class="video-card reveal featured" data-category="casamentos">
+        <div class="video-embed wide">
+          <iframe src="https://www.youtube.com/embed/ZM2piJ8YfVw" frameborder="0" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+        </div>
+        <div class="video-card-info">
+          <span class="video-card-title">Filme de Casamento</span>
+          <span class="video-card-tag">Casamentos</span>
+        </div>
+      </div>
+      <div class="video-card reveal featured" data-category="casamentos">
+        <div class="video-embed wide">
+          <iframe src="https://www.youtube.com/embed/Mz5DUr6JmPo" frameborder="0" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+        </div>
+        <div class="video-card-info">
+          <span class="video-card-title">Filme de Casamento</span>
+          <span class="video-card-tag">Casamentos</span>
+        </div>
+      </div>
+      <div class="video-card reveal featured" data-category="casamentos">
+        <div class="video-embed wide">
+          <iframe src="https://www.youtube.com/embed/0aG4ufzNfls" frameborder="0" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+        </div>
+        <div class="video-card-info">
+          <span class="video-card-title">Filme de Casamento</span>
+          <span class="video-card-tag">Casamentos</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section id="about">
+    <div class="about-visual reveal">
+      <div class="about-img-placeholder">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+          <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+        </svg>
+        <p>A tua foto aqui</p>
+      </div>
+      <div class="about-accent-block"></div>
+    </div>
+    <div class="about-content reveal">
+      <p class="section-label">Sobre mim</p>
+      <h2 class="section-title">QUEM<br>SOU</h2>
+      <p class="about-body">
+        Sou Marco Mota, videógrafo baseado em Aveiro com experiência em conteúdo para social media, cobertura de eventos e casamentos. Com uma Sony FX3 e anos de pós-produção em Adobe Premiere Pro e After Effects, crio conteúdo que não passa despercebido — seja um reel para Instagram ou o filme do dia mais importante da tua vida.
+      </p>
+      <div class="about-stats">
+        <div>
+          <div class="stat-number">3+</div>
+          <div class="stat-label">Anos de experiência</div>
+        </div>
+        <div>
+          <div class="stat-number">Sony</div>
+          <div class="stat-label">FX3 — câmara principal</div>
+        </div>
+        <div>
+          <div class="stat-number">AVR</div>
+          <div class="stat-label">Baseado em Aveiro</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SERVICES -->
+  <section id="services">
+    <div class="reveal">
+      <p class="section-label">O que faço</p>
+      <h2 class="section-title">SERVIÇOS</h2>
+    </div>
+    <div class="services-grid">
+      <div class="service-item reveal">
+        <div class="service-number">01</div>
+        <div class="service-name">Social Media & Conteúdo de Marca</div>
+        <p class="service-desc">Reels, vídeos para campanhas digitais e conteúdo otimizado para cada plataforma. Filmagem e edição completa.</p>
+        <div class="service-tags">
+          <span class="service-tag">Instagram</span>
+          <span class="service-tag">TikTok</span>
+          <span class="service-tag">LinkedIn</span>
+          <span class="service-tag">YouTube</span>
+        </div>
+      </div>
+      <div class="service-item reveal">
+        <div class="service-number">02</div>
+        <div class="service-name">Cobertura de Eventos</div>
+        <p class="service-desc">Captação de eventos corporativos, conferências, festivais e cerimónias. Entrega de highlight films e conteúdo para divulgação.</p>
+        <div class="service-tags">
+          <span class="service-tag">Corporate</span>
+          <span class="service-tag">Highlight Film</span>
+          <span class="service-tag">Multiâmago</span>
+        </div>
+      </div>
+      <div class="service-item reveal">
+        <div class="service-number">03</div>
+        <div class="service-name">Casamentos</div>
+        <p class="service-desc">Filmes de casamento com narrativa cinematográfica. Do dia-de do full wedding film, criados para durar para sempre.</p>
+        <div class="service-tags">
+          <span class="service-tag">Cinematic</span>
+          <span class="service-tag">Same-day edit</span>
+          <span class="service-tag">Trailer</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact">
+    <h2 class="contact-title reveal">
+      <span class="outline">VAMOS</span><br>
+      <span class="accent">TRABALHAR</span><br>
+      <span class="outline">JUNTOS</span>
+    </h2>
+    <p class="contact-sub reveal">Tens um projeto em mente? Fala comigo — respondo sempre.</p>
+    <a href="mailto:masm_@msn.com" class="contact-email reveal">masm_@msn.com</a>
+    <div class="contact-socials reveal">
+      <a href="https://www.linkedin.com/in/marcoasmota/" class="social-link" target="_blank">LinkedIn</a>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-logo">MARCO<span>.</span>MOTA</div>
+    <div class="footer-copy">© 2025 Marco Mota — Videografia</div>
+  </footer>
+
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+    // CUSTOM CURSOR
+    const cursor = document.getElementById('cursor');
+    document.addEventListener('mousemove', e => {
+      cursor.style.left = e.clientX + 'px';
+      cursor.style.top = e.clientY + 'px';
+    });
+    document.querySelectorAll('a, button, .video-card').forEach(el => {
+      el.addEventListener('mouseenter', () => cursor.classList.add('expand'));
+      el.addEventListener('mouseleave', () => cursor.classList.remove('expand'));
+    });
+
+    // SCROLL REVEAL
+    const revealEls = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry, i) => {
+        if (entry.isIntersecting) {
+          entry.target.style.transitionDelay = (i % 4) * 0.08 + 's';
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
+    revealEls.forEach(el => observer.observe(el));
+
+    // FILTER TABS
+    const tabs = document.querySelectorAll('.filter-tab');
+    const cards = document.querySelectorAll('.video-card');
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        const filter = tab.da
